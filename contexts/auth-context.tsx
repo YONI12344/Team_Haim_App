@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Create new user document
           const newUser: Omit<User, 'id'> = {
             email: fbUser.email!,
-            name: fbUser.displayName || (role === "coach" ? "Coach" : "Athlete"),
+            name: fbUser.displayName || fbUser.email?.split('@')[0] || (role === "coach" ? "Coach" : "Athlete"),
             photoURL: fbUser.photoURL || undefined,
             role,
             createdAt: new Date(),

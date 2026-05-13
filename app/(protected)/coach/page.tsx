@@ -185,7 +185,7 @@ export default function CoachDashboard() {
                         <Avatar className="h-12 w-12">
                           <AvatarImage src={athlete.photoURL} />
                           <AvatarFallback className="bg-primary text-primary-foreground">
-                            {athlete.name.charAt(0)}
+                            {(athlete.name || '').charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
