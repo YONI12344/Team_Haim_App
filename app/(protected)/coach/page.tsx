@@ -13,6 +13,7 @@ import type { User, Workout, WorkoutLog } from "@/types"
 import { format, startOfWeek, endOfWeek } from "date-fns"
 import { Users, TrendingUp, Calendar, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { getUserInitial } from "@/lib/utils"
 
 interface AthleteWithStats extends User {
   weeklyKm: number
@@ -197,7 +198,7 @@ export default function CoachDashboard() {
                         <Avatar className="h-12 w-12">
                           <AvatarImage src={athlete.photoURL} />
                           <AvatarFallback className="bg-primary text-primary-foreground">
-                            {(athlete.name || athlete.email?.split("@")[0] || "U").charAt(0).toUpperCase()}
+                            {getUserInitial(athlete)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">

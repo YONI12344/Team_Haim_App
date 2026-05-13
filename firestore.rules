@@ -1,4 +1,7 @@
 rules_version = '2';
+// NOTE: The coach is identified by their email below. For better security and
+// flexibility, consider setting a custom claim (e.g. request.auth.token.role == 'coach')
+// via Firebase Admin SDK instead of hardcoding the email.
 service cloud.firestore {
   match /databases/{database}/documents {
     // Users can read and write their own user document

@@ -19,6 +19,7 @@ import type { User } from "@/types"
 import { format } from "date-fns"
 import { Loader2, Plus, Users, Mail, Trash2, UserPlus } from "lucide-react"
 import Link from "next/link"
+import { getUserInitial } from "@/lib/utils"
 
 export default function AthletesPage() {
   const { t, language } = useLanguage()
@@ -160,7 +161,7 @@ export default function AthletesPage() {
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={athlete.photoURL} />
                       <AvatarFallback className="bg-primary text-primary-foreground">
-                        {(athlete.name || athlete.email?.split("@")[0] || "U").charAt(0).toUpperCase()}
+                        {getUserInitial(athlete)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">

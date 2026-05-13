@@ -15,6 +15,7 @@ import type { User, AthleteProfile, Workout, WorkoutLog } from "@/types"
 import { format, startOfWeek, endOfWeek, subMonths } from "date-fns"
 import { Loader2, ArrowRight, TrendingUp, Calendar, Target, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import { getUserInitial } from "@/lib/utils"
 
 export default function AthleteDetailPage() {
   const params = useParams()
@@ -114,7 +115,7 @@ export default function AthleteDetailPage() {
             <Avatar className="h-20 w-20">
               <AvatarImage src={athlete.photoURL} />
               <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {(athlete.name || athlete.email?.split("@")[0] || "U").charAt(0).toUpperCase()}
+                {getUserInitial(athlete)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
