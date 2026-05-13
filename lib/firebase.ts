@@ -1,32 +1,27 @@
 import { initializeApp, getApps } from "firebase/app"
-import { getAuth, GoogleAuthProvider } from "firebase/auth"
+import { getAuth } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import { getDatabase } from "firebase/database"
 import { getStorage } from "firebase/storage"
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDLbpHzJ2i1Bl5pkI14yjCkah7GK4QVYKs",
-  authDomain: "team-haim.firebaseapp.com",
-  projectId: "team-haim",
-  storageBucket: "team-haim.firebasestorage.app",
-  messagingSenderId: "57632152447",
-  appId: "1:57632152447:web:b2109f9fb26f50cc5a584a"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
 }
 
-// Initialize Firebase only once
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  console.warn("Firebase environment variables are missing. Check your .env file.")
+}
+
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
 
-// Auth
 export const auth = getAuth(app)
-export const googleProvider = new GoogleAuthProvider()
-
-// Firestore (main database)
 export const db = getFirestore(app)
-
-// Realtime Database (for chat)
-export const realtimeDb = getDatabase(app)
-
-// Storage (for profile photos)
+export const rtdb = getDatabase(app)
 export const storage = getStorage(app)
-
 export default app

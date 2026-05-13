@@ -10,7 +10,7 @@ import {
   serverTimestamp as rtServerTimestamp,
   limitToLast
 } from "firebase/database"
-import { realtimeDb } from "@/lib/firebase"
+import { rtdb as realtimeDb } from "@/lib/firebase"
 import type { Message, Conversation } from "@/types"
 
 const MESSAGES_PATH = "messages"
