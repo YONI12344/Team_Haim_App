@@ -122,7 +122,7 @@ export default function ProfilePage() {
             <Avatar className="h-20 w-20">
               <AvatarImage src={user?.photoURL} />
               <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {user?.name?.charAt(0)}
+                {(user?.name || user?.displayName || user?.email?.split('@')[0] || 'User').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>

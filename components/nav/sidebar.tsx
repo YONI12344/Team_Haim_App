@@ -107,7 +107,7 @@ export function Sidebar() {
           <Avatar className="h-9 w-9">
             <AvatarImage src={user?.photoURL} />
             <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground">
-              {user?.name?.charAt(0) || "U"}
+              {(user?.name || user?.displayName || user?.email?.split('@')[0] || 'U').charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
