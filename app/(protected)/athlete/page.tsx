@@ -20,6 +20,7 @@ export default function AthleteDashboard() {
   const [weekWorkouts, setWeekWorkouts] = useState<Workout[]>([])
   const [weekLogs, setWeekLogs] = useState<WorkoutLog[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null)
   const [logDialogOpen, setLogDialogOpen] = useState(false)
 
@@ -49,6 +50,7 @@ export default function AthleteDashboard() {
         setTodayWorkout(todayW || null)
       } catch (error) {
         console.error("Error loading dashboard data:", error)
+        setError(true)
       } finally {
         setLoading(false)
       }
@@ -85,6 +87,16 @@ export default function AthleteDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-muted-foreground">
+          {language === "he" ? "שגיאה בטעינת הנתונים. נסה שוב מאוחר יותר." : "Error loading data. Please try again later."}
+        </p>
       </div>
     )
   }

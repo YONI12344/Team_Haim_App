@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,14 +22,14 @@ import {
   isToday
 } from "date-fns"
 import { he, enUS } from "date-fns/locale"
-import { Loader2, ChevronLeft, ChevronRight, Check } from "lucide-react"
+import { Loader2, ChevronLeft, ChevronRight, Check, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
 
 export default function CoachSchedulePage() {
   const { user } = useAuth()
   const { t, language, isRTL } = useLanguage()
   const locale = language === "he" ? he : enUS
+  const router = useRouter()
   
   const [athletes, setAthletes] = useState<User[]>([])
   const [selectedAthlete, setSelectedAthlete] = useState<string>("all")
@@ -91,6 +92,11 @@ export default function CoachSchedulePage() {
   const handleWorkoutClick = (workout: Workout) => {
     setSelectedWorkout(workout)
     setDetailOpen(true)
+  }
+
+  const handleDayClick = (date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd")
+    router.push(`/coach/workouts?date=${dateStr}`)
   }
 
   // Get week days
@@ -195,16 +201,25 @@ export default function CoachSchedulePage() {
                     <div
                       key={i}
                       className={cn(
-                        "min-h-[150px] p-2 rounded-lg border",
+                        "min-h-[150px] p-2 rounded-lg border group",
                         today ? "border-primary ring-2 ring-primary/20" : "border-border"
                       )}
                     >
-                      {/* Date number */}
-                      <div className={cn(
-                        "text-sm mb-2",
-                        today && "text-primary font-bold"
-                      )}>
-                        {format(day, "d")}
+                      {/* Date number + add button */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className={cn(
+                          "text-sm",
+                          today && "text-primary font-bold"
+                        )}>
+                          {format(day, "d")}
+                        </div>
+                        <button
+                          onClick={() => handleDayClick(day)}
+                          className="opacity-0 group-hover:opacity-100 h-5 w-5 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-opacity"
+                          title={language === "he" ? "צור אימון" : "Create workout"}
+                        >
+                          <Plus className="h-3 w-3 text-primary" />
+                        </button>
                       </div>
 
                       {/* Workouts */}
@@ -215,7 +230,7 @@ export default function CoachSchedulePage() {
                           return (
                             <div
                               key={workout.id}
-                              onClick={() => handleWorkoutClick(workout)}
+                              onClick={(e) => { e.stopPropagation(); handleWorkoutClick(workout) }}
                               className={cn(
                                 "p-2 rounded text-xs border-s-2 cursor-pointer hover:shadow-sm transition-shadow",
                                 WORKOUT_COLORS_LIGHT[workout.type]
@@ -244,7 +259,12 @@ export default function CoachSchedulePage() {
                         })}
 
                         {dayWorkouts.length === 0 && (
-                          <p className="text-xs text-muted-foreground text-center py-2">-</p>
+                          <button
+                            onClick={() => handleDayClick(day)}
+                            className="w-full text-xs text-muted-foreground/50 hover:text-muted-foreground text-center py-2 transition-colors"
+                          >
+                            +
+                          </button>
                         )}
                       </div>
                     </div>
@@ -255,15 +275,6 @@ export default function CoachSchedulePage() {
           )}
         </CardContent>
       </Card>
-
-      {/* Quick link to create workout */}
-      <div className="text-center">
-        <Link href="/coach/workouts">
-          <Button variant="outline">
-            {t("createWorkout")}
-          </Button>
-        </Link>
-      </div>
 
       {/* Workout Detail Dialog */}
       <WorkoutDetailDialog

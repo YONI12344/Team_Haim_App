@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,16 +28,20 @@ const WORKOUT_TYPES: WorkoutType[] = [
 export default function WorkoutsPage() {
   const { user } = useAuth()
   const { t, language } = useLanguage()
+  const searchParams = useSearchParams()
   
   const [athletes, setAthletes] = useState<User[]>([])
   const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  // Form state
+  // Form state - pre-fill date from URL param if present
   const [title, setTitle] = useState("")
   const [workoutType, setWorkoutType] = useState<WorkoutType>("easy")
-  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"))
+  const [date, setDate] = useState(() => {
+    const paramDate = searchParams.get("date")
+    return paramDate || format(new Date(), "yyyy-MM-dd")
+  })
   const [description, setDescription] = useState("")
   const [assignToTeam, setAssignToTeam] = useState(true)
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([])

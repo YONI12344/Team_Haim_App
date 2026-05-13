@@ -36,10 +36,14 @@ export async function updateUser(userId: string, data: Partial<User>): Promise<v
 }
 
 export async function getAllAthletes(): Promise<User[]> {
-  const q = query(collection(db, USERS_COLLECTION), where("role", "==", "athlete"))
-  const snapshot = await getDocs(q)
-  
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User))
+  try {
+    const q = query(collection(db, USERS_COLLECTION), where("role", "==", "athlete"))
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User))
+  } catch (error) {
+    console.error("Error fetching athletes:", error)
+    return []
+  }
 }
 
 // Authorized Athletes (invite system)
@@ -58,11 +62,16 @@ export async function removeAuthorizedAthlete(email: string): Promise<void> {
 }
 
 export async function getAuthorizedAthletes(): Promise<{ email: string; name: string; addedAt: Date }[]> {
-  const snapshot = await getDocs(collection(db, AUTHORIZED_COLLECTION))
-  return snapshot.docs.map(doc => ({
-    email: doc.id,
-    ...doc.data(),
-  })) as { email: string; name: string; addedAt: Date }[]
+  try {
+    const snapshot = await getDocs(collection(db, AUTHORIZED_COLLECTION))
+    return snapshot.docs.map(doc => ({
+      email: doc.id,
+      ...doc.data(),
+    })) as { email: string; name: string; addedAt: Date }[]
+  } catch (error) {
+    console.error("Error fetching authorized athletes:", error)
+    return []
+  }
 }
 
 // Athlete Profiles
@@ -98,11 +107,16 @@ export async function updateAthleteProfile(userId: string, data: Partial<Athlete
 
 // Get coach profile (the user with role "coach")
 export async function getCoachProfile(): Promise<User | null> {
-  const q = query(collection(db, USERS_COLLECTION), where("role", "==", "coach"))
-  const snapshot = await getDocs(q)
-  
-  if (snapshot.empty) return null
-  
-  const coachDoc = snapshot.docs[0]
-  return { id: coachDoc.id, ...coachDoc.data() } as User
+  try {
+    const q = query(collection(db, USERS_COLLECTION), where("role", "==", "coach"))
+    const snapshot = await getDocs(q)
+    
+    if (snapshot.empty) return null
+    
+    const coachDoc = snapshot.docs[0]
+    return { id: coachDoc.id, ...coachDoc.data() } as User
+  } catch (error) {
+    console.error("Error fetching coach profile:", error)
+    return null
+  }
 }

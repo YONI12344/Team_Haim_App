@@ -114,7 +114,7 @@ export default function AthleteDetailPage() {
             <Avatar className="h-20 w-20">
               <AvatarImage src={athlete.photoURL} />
               <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {athlete.name.charAt(0)}
+                {(athlete.name || athlete.email?.split("@")[0] || "U").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">

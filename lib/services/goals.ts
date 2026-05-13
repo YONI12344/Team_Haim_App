@@ -25,22 +25,27 @@ export async function createGoal(goal: Omit<Goal, "id" | "createdAt">): Promise<
 }
 
 export async function getGoalsForAthlete(athleteId: string): Promise<Goal[]> {
-  const q = query(
-    collection(db, GOALS_COLLECTION),
-    where("athleteId", "==", athleteId),
-    orderBy("createdAt", "desc")
-  )
-  
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map(doc => {
-    const data = doc.data()
-    return { 
-      id: doc.id, 
-      ...data,
-      targetDate: data.targetDate instanceof Timestamp ? data.targetDate.toDate() : data.targetDate,
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
-    } as Goal
-  })
+  try {
+    const q = query(
+      collection(db, GOALS_COLLECTION),
+      where("athleteId", "==", athleteId),
+      orderBy("createdAt", "desc")
+    )
+    
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => {
+      const data = doc.data()
+      return { 
+        id: doc.id, 
+        ...data,
+        targetDate: data.targetDate instanceof Timestamp ? data.targetDate.toDate() : data.targetDate,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+      } as Goal
+    })
+  } catch (error) {
+    console.error("Error fetching goals for athlete:", error)
+    return []
+  }
 }
 
 export async function updateGoal(goalId: string, data: Partial<Goal>): Promise<void> {

@@ -25,6 +25,7 @@ export default function CoachDashboard() {
   const { t, language, isRTL } = useLanguage()
   const [athletes, setAthletes] = useState<AthleteWithStats[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const today = new Date()
   const todayStr = format(today, "yyyy-MM-dd")
@@ -66,6 +67,7 @@ export default function CoachDashboard() {
       setAthletes(athletesWithStats)
     } catch (error) {
       console.error("Error loading coach dashboard:", error)
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -83,6 +85,16 @@ export default function CoachDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-muted-foreground">
+          {language === "he" ? "שגיאה בטעינת הנתונים. נסה שוב מאוחר יותר." : "Error loading dashboard data. Please try again later."}
+        </p>
       </div>
     )
   }
@@ -185,7 +197,7 @@ export default function CoachDashboard() {
                         <Avatar className="h-12 w-12">
                           <AvatarImage src={athlete.photoURL} />
                           <AvatarFallback className="bg-primary text-primary-foreground">
-                            {athlete.name.charAt(0)}
+                            {(athlete.name || athlete.email?.split("@")[0] || "U").charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">

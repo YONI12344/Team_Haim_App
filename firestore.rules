@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Coach can read all users
+      allow read: if request.auth != null;
+    }
+
+    // Athlete profiles - athletes read/write their own, coach reads all
+    match /athlete_profiles/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null;
+    }
+
+    // Workouts - coach writes, all authenticated users read
+    match /workouts/{workoutId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.email == 'info.teamhaim@gmail.com';
+    }
+
+    // Workout logs - authenticated users read/write their own logs
+    match /workout_logs/{logId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Goals - athletes read/write their own goals
+    match /goals/{goalId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Messages - authenticated users read/write
+    match /messages/{messageId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Authorized athletes list - only coach can write, authenticated users can read
+    match /authorized_athletes/{email} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.email == 'info.teamhaim@gmail.com';
+    }
+  }
+}

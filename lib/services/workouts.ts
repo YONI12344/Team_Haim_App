@@ -61,74 +61,84 @@ export async function getWorkoutsForAthlete(
   startDate: string, 
   endDate: string
 ): Promise<Workout[]> {
-  // Get team workouts and individual assignments
-  const teamQuery = query(
-    collection(db, WORKOUTS_COLLECTION),
-    where("assignedTo", "array-contains", "team"),
-    where("date", ">=", startDate),
-    where("date", "<=", endDate),
-    orderBy("date")
-  )
-  
-  const individualQuery = query(
-    collection(db, WORKOUTS_COLLECTION),
-    where("assignedTo", "array-contains", athleteId),
-    where("date", ">=", startDate),
-    where("date", "<=", endDate),
-    orderBy("date")
-  )
-  
-  const [teamSnap, individualSnap] = await Promise.all([
-    getDocs(teamQuery),
-    getDocs(individualQuery)
-  ])
-  
-  const workoutsMap = new Map<string, Workout>()
-  
-  // Process team workouts
-  teamSnap.docs.forEach(doc => {
-    const data = doc.data()
-    workoutsMap.set(doc.id, { 
-      id: doc.id, 
-      ...data,
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
-      updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
-    } as Workout)
-  })
-  
-  // Process individual workouts (may override team workouts)
-  individualSnap.docs.forEach(doc => {
-    const data = doc.data()
-    workoutsMap.set(doc.id, { 
-      id: doc.id, 
-      ...data,
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
-      updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
-    } as Workout)
-  })
-  
-  return Array.from(workoutsMap.values()).sort((a, b) => a.date.localeCompare(b.date))
+  try {
+    // Get team workouts and individual assignments
+    const teamQuery = query(
+      collection(db, WORKOUTS_COLLECTION),
+      where("assignedTo", "array-contains", "team"),
+      where("date", ">=", startDate),
+      where("date", "<=", endDate),
+      orderBy("date")
+    )
+    
+    const individualQuery = query(
+      collection(db, WORKOUTS_COLLECTION),
+      where("assignedTo", "array-contains", athleteId),
+      where("date", ">=", startDate),
+      where("date", "<=", endDate),
+      orderBy("date")
+    )
+    
+    const [teamSnap, individualSnap] = await Promise.all([
+      getDocs(teamQuery),
+      getDocs(individualQuery)
+    ])
+    
+    const workoutsMap = new Map<string, Workout>()
+    
+    // Process team workouts
+    teamSnap.docs.forEach(doc => {
+      const data = doc.data()
+      workoutsMap.set(doc.id, { 
+        id: doc.id, 
+        ...data,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
+      } as Workout)
+    })
+    
+    // Process individual workouts (may override team workouts)
+    individualSnap.docs.forEach(doc => {
+      const data = doc.data()
+      workoutsMap.set(doc.id, { 
+        id: doc.id, 
+        ...data,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
+      } as Workout)
+    })
+    
+    return Array.from(workoutsMap.values()).sort((a, b) => a.date.localeCompare(b.date))
+  } catch (error) {
+    console.error("Error fetching workouts for athlete:", error)
+    return []
+  }
 }
 
 // Get all workouts for a date range (coach view)
 export async function getAllWorkouts(startDate: string, endDate: string): Promise<Workout[]> {
-  const q = query(
-    collection(db, WORKOUTS_COLLECTION),
-    where("date", ">=", startDate),
-    where("date", "<=", endDate),
-    orderBy("date")
-  )
-  
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map(doc => {
-    const data = doc.data()
-    return { 
-      id: doc.id, 
-      ...data,
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
-      updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
-    } as Workout
-  })
+  try {
+    const q = query(
+      collection(db, WORKOUTS_COLLECTION),
+      where("date", ">=", startDate),
+      where("date", "<=", endDate),
+      orderBy("date")
+    )
+    
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => {
+      const data = doc.data()
+      return { 
+        id: doc.id, 
+        ...data,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
+      } as Workout
+    })
+  } catch (error) {
+    console.error("Error fetching all workouts:", error)
+    return []
+  }
 }
 
 // Workout Logs
@@ -141,41 +151,51 @@ export async function createWorkoutLog(log: Omit<WorkoutLog, "id" | "createdAt">
 }
 
 export async function getWorkoutLog(athleteId: string, workoutId: string): Promise<WorkoutLog | null> {
-  const q = query(
-    collection(db, LOGS_COLLECTION),
-    where("athleteId", "==", athleteId),
-    where("workoutId", "==", workoutId)
-  )
-  
-  const snapshot = await getDocs(q)
-  if (snapshot.empty) return null
-  
-  const doc = snapshot.docs[0]
-  const data = doc.data()
-  return { 
-    id: doc.id, 
-    ...data,
-    createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
-  } as WorkoutLog
-}
-
-export async function getLogsForAthlete(athleteId: string, startDate: string, endDate: string): Promise<WorkoutLog[]> {
-  const q = query(
-    collection(db, LOGS_COLLECTION),
-    where("athleteId", "==", athleteId),
-    where("date", ">=", startDate),
-    where("date", "<=", endDate)
-  )
-  
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map(doc => {
+  try {
+    const q = query(
+      collection(db, LOGS_COLLECTION),
+      where("athleteId", "==", athleteId),
+      where("workoutId", "==", workoutId)
+    )
+    
+    const snapshot = await getDocs(q)
+    if (snapshot.empty) return null
+    
+    const doc = snapshot.docs[0]
     const data = doc.data()
     return { 
       id: doc.id, 
       ...data,
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
     } as WorkoutLog
-  })
+  } catch (error) {
+    console.error("Error fetching workout log:", error)
+    return null
+  }
+}
+
+export async function getLogsForAthlete(athleteId: string, startDate: string, endDate: string): Promise<WorkoutLog[]> {
+  try {
+    const q = query(
+      collection(db, LOGS_COLLECTION),
+      where("athleteId", "==", athleteId),
+      where("date", ">=", startDate),
+      where("date", "<=", endDate)
+    )
+    
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => {
+      const data = doc.data()
+      return { 
+        id: doc.id, 
+        ...data,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+      } as WorkoutLog
+    })
+  } catch (error) {
+    console.error("Error fetching logs for athlete:", error)
+    return []
+  }
 }
 
 export async function updateWorkoutLog(logId: string, data: Partial<WorkoutLog>): Promise<void> {
