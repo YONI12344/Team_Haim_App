@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
-  const { user, loading, signInWithGoogle, isAuthorized, firebaseUser } = useAuth()
+  const { user, loading, signInWithGoogle, isAuthorized } = useAuth()
   const { t, language, setLanguage, dir } = useLanguage()
   const router = useRouter()
 
@@ -28,48 +28,6 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background" dir={dir}>
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  // Show access denied if user is logged in but not authorized
-  if (firebaseUser && !isAuthorized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4" dir={dir}>
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
-              <svg
-                className="h-8 w-8 text-destructive"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-            </div>
-            <CardTitle className="text-destructive">{t("accessDenied")}</CardTitle>
-            <CardDescription className="text-base mt-2">
-              {t("notAuthorized")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                // Sign out and go back
-                window.location.reload()
-              }}
-            >
-              {t("back")}
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     )
   }

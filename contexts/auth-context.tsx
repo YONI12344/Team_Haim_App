@@ -4,14 +4,16 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { 
   onAuthStateChanged, 
   signInWithPopup, 
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   type User as FirebaseUser 
 } from "firebase/auth"
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
-import { auth, googleProvider, db } from "@/lib/firebase"
+import { auth, db } from "@/lib/firebase"
 import type { User, UserRole } from "@/types"
 
 const COACH_EMAIL = "info.teamhaim@gmail.com"
+const googleProvider = new GoogleAuthProvider()
 
 interface AuthContextType {
   user: User | null
@@ -37,64 +39,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (fbUser) {
         setFirebaseUser(fbUser)
         
-        // Check if user exists in Firestore
+        const role: UserRole = fbUser.email === COACH_EMAIL ? "coach" : "athlete"
         const userRef = doc(db, "users", fbUser.uid)
         const userSnap = await getDoc(userRef)
         
         if (userSnap.exists()) {
           const userData = userSnap.data() as Omit<User, 'id'>
-          setUser({ id: fbUser.uid, ...userData })
-          setIsAuthorized(true)
-        } else {
-          // Check if coach or authorized athlete
-          const isCoach = fbUser.email === COACH_EMAIL
-          
-          if (isCoach) {
-            // Auto-create coach account
-            const newUser: Omit<User, 'id'> = {
-              email: fbUser.email!,
-              name: fbUser.displayName || "Coach",
-              photoURL: fbUser.photoURL || undefined,
-              role: "coach",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }
-            await setDoc(userRef, {
-              ...newUser,
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp(),
-            })
-            setUser({ id: fbUser.uid, ...newUser })
-            setIsAuthorized(true)
-          } else {
-            // Check if athlete is in authorized list
-            const authorizedRef = doc(db, "authorized_athletes", fbUser.email!)
-            const authorizedSnap = await getDoc(authorizedRef)
-            
-            if (authorizedSnap.exists()) {
-              // Create athlete account
-              const newUser: Omit<User, 'id'> = {
-                email: fbUser.email!,
-                name: fbUser.displayName || "Athlete",
-                photoURL: fbUser.photoURL || undefined,
-                role: "athlete",
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              }
-              await setDoc(userRef, {
-                ...newUser,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-              })
-              setUser({ id: fbUser.uid, ...newUser })
-              setIsAuthorized(true)
-            } else {
-              // Not authorized
-              setUser(null)
-              setIsAuthorized(false)
-            }
+          // Ensure role is always up-to-date based on email
+          const currentUser = { id: fbUser.uid, ...userData, role }
+          setUser(currentUser)
+          // Update role in Firestore if it changed
+          if (userData.role !== role) {
+            await setDoc(userRef, { role, updatedAt: serverTimestamp() }, { merge: true })
           }
+        } else {
+          // Create new user document
+          const newUser: Omit<User, 'id'> = {
+            email: fbUser.email!,
+            name: fbUser.displayName || (role === "coach" ? "Coach" : "Athlete"),
+            photoURL: fbUser.photoURL || undefined,
+            role,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }
+          await setDoc(userRef, {
+            ...newUser,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          })
+          setUser({ id: fbUser.uid, ...newUser })
         }
+        setIsAuthorized(true)
       } else {
         setFirebaseUser(null)
         setUser(null)
