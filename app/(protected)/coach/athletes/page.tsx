@@ -16,6 +16,7 @@ import {
   removeAuthorizedAthlete 
 } from "@/lib/services/users"
 import type { User } from "@/types"
+import { safeInitial } from "@/lib/utils"
 import { format } from "date-fns"
 import { Loader2, Plus, Users, Mail, Trash2, UserPlus } from "lucide-react"
 import Link from "next/link"
@@ -160,7 +161,7 @@ export default function AthletesPage() {
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={athlete.photoURL} />
                       <AvatarFallback className="bg-primary text-primary-foreground">
-                        {athlete.name.charAt(0)}
+                        {safeInitial(athlete)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">

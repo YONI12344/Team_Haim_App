@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import { cn } from "@/lib/utils"
+import { cn, safeInitial } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -107,7 +107,7 @@ export function Sidebar() {
           <Avatar className="h-9 w-9">
             <AvatarImage src={user?.photoURL} />
             <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground">
-              {user?.name?.charAt(0) || "U"}
+              {safeInitial(user)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">

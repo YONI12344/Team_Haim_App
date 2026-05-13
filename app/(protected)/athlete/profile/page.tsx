@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getAthleteProfile, createAthleteProfile, updateAthleteProfile } from "@/lib/services/users"
 import type { AthleteProfile } from "@/types"
 import { Loader2, User, Activity, Heart, Footprints, Trophy, Timer, AlertCircle } from "lucide-react"
+import { safeInitial } from "@/lib/utils"
 
 export default function ProfilePage() {
   const { user } = useAuth()
@@ -122,7 +123,7 @@ export default function ProfilePage() {
             <Avatar className="h-20 w-20">
               <AvatarImage src={user?.photoURL} />
               <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {user?.name?.charAt(0)}
+                {safeInitial(user)}
               </AvatarFallback>
             </Avatar>
             <div>
